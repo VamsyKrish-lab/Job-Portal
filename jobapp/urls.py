@@ -25,7 +25,12 @@ from .views import (
     AdminCreatePasswordTokenView,
     help_topics, 
     RaiseTicketCreateView,
-    ContactMessageCreateAPIView
+    ContactMessageCreateAPIView,
+    SubmitCompanyVerification,
+    CompanyVerificationAction,
+    
+    
+
 )
 from . import views 
  
@@ -100,4 +105,15 @@ urlpatterns = [
 
     # Contact Us
     path('contact/', ContactMessageCreateAPIView.as_view(), name='contact-message'),
+
+    # Company Verify 
+    path("company/verify/",SubmitCompanyVerification.as_view()),
+     path("admin/company-verification/<int:pk>/",CompanyVerificationAction.as_view()),
+
+   
+
+   
+    
+  
+    
 ]

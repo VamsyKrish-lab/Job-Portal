@@ -19,6 +19,7 @@ from .models import (
     HelpTopic,
     RaiseTicket,
     ContactMessage,
+    CompanyVerification,
 )
 
 # -------------------------
@@ -223,4 +224,12 @@ class ContactMessageAdmin(admin.ModelAdmin):
     search_fields = ("name", "email", "contact")
     readonly_fields = ("created_at",)
     ordering = ("-created_at",)
+
+@admin.register(CompanyVerification)
+class CompanyVerificationAdmin(admin.ModelAdmin):
+
+    list_display = ("legal_name","official_email","phone_number","status","created_at")
+    list_filter = ("status",) 
+
+       
  
