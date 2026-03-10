@@ -8,7 +8,7 @@ from .models import (
     EducationEntry, WorkExperienceEntry, Skill, LanguageKnown, Certification,
     Company, Job, JobApplication, SavedJob,
     NewsletterSubscriber, Notification, Conversation, Message, ContactMessage, 
-    CompanyVerification,
+    CompanyVerification, PostAJob,
 )
 
 User = get_user_model()
@@ -841,5 +841,13 @@ class CompanyVerificationSerializer(serializers.ModelSerializer):
 
         return data
          
- 
- 
+# Post a Job Serializer
+
+from .models import PostAJob
+
+class PostAJobSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PostAJob
+        fields = "__all__"
+        read_only_fields = ["employer", "is_published", "created_at"]
