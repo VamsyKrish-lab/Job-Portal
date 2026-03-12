@@ -1,4 +1,5 @@
 # views.py (only user + profile)
+
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status, generics
@@ -1203,3 +1204,50 @@ class PostedJobListView(generics.ListAPIView):
     queryset = PostAJob.objects.filter(is_published=True)
     serializer_class = PostAJobSerializer
 
+# Newsletter
+from rest_framework.response import Response
+from rest_framework import status
+from .models import NewsletterSubscriber
+from .serializers import NewsletterSubscriberSerializer
+ 
+ 
+class NewsletterSubscribeAPIView(APIView):
+ 
+    def post(self, request):
+
+        email = request.data.get("email")
+        print(request.data)
+ 
+        if not email:
+            return Response(
+                {"error": "Email is required"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+ 
+        if NewsletterSubscriber.objects.filter(email=email).exists():
+            return Response(
+                {"message": "Email already subscribed"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+ 
+        serializer = NewsletterSubscriberSerializer(data={"email": email})
+ 
+        if serializer.is_valid():
+            serializer.save()
+            return Response(
+                {"message": "Subscribed successfully"},
+                status=status.HTTP_201_CREATED
+            )
+ 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+from rest_framework import generics
+from .models import JobSeekerProfile
+from .serializers import JobSeekerProfileReadSerializer
+from .permissions import IsAdminOrEmployer
+
+
+class JobSeekerListView(generics.ListAPIView):
+    queryset = JobSeekerProfile.objects.all()
+    serializer_class = JobSeekerProfileReadSerializer
+    permission_classes = [IsAdminOrEmployer]   

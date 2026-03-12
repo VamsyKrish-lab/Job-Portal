@@ -33,7 +33,8 @@ from .views import (
     PublishJobView,
     UpdateJobView,
     DeleteJobView,
-    JobListView
+    JobListView,
+    NewsletterSubscribeAPIView,
 )
 from . import views 
  
@@ -119,9 +120,15 @@ urlpatterns = [
     path('job/publish/<int:pk>/', PublishJobView.as_view()),
     path('job/update/<int:pk>/', UpdateJobView.as_view()),
     path('job/delete/<int:pk>/', DeleteJobView.as_view()),
-    path('job/list/', JobListView.as_view())
+    path('job/list/', JobListView.as_view()),
+
+    # ----newsletter subscribe--------------------------------
+    path("subscribe/", NewsletterSubscribeAPIView.as_view(), name="subscribe-newsletter"),
+
+    path('jobseekers/', views.JobSeekerListView.as_view(), name='jobseeker-list'),
 
 ]    
+
    
     
 
