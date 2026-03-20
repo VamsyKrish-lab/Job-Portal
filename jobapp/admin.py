@@ -282,3 +282,45 @@ class JobSeekerProfileAdmin(admin.ModelAdmin):
         LanguageInline,
         CertificationInline
     ]
+
+from django.contrib import admin
+from .models import Complaint
+
+
+@admin.register(Complaint)
+class ComplaintAdmin(admin.ModelAdmin):
+
+    list_display = (
+        'full_name',   
+        'email',
+        'mobile',
+        'reason',
+        'status',
+        'created_at'
+    )
+
+    list_filter = ('status', 'created_at')
+
+    search_fields = (
+        'first_name',
+        'last_name',
+        'email',
+        'mobile',
+        'reason'
+    )
+
+    ordering = ('-created_at',)
+
+    readonly_fields = ('created_at', 'user')
+
+    list_per_page = 20
+
+    
+    def full_name(self, obj):
+        return f"{obj.first_name} {obj.last_name}"
+
+  
+    full_name.short_description = "Full Name"
+
+   
+    full_name.admin_order_field = 'first_name'

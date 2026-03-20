@@ -1332,3 +1332,55 @@ class VerifyEmailOTPView(APIView):
 
         except User.DoesNotExist:
             return Response({"error": "User not found"}, status=404)    
+
+# Report A Job
+
+from .models import Complaint
+from .serializers import ComplaintSerializer
+from .permissions import IsJobSeeker, IsAdminUserType
+
+class SubmitComplaintView(APIView):
+    permission_classes = [IsAuthenticated, IsJobSeeker]
+
+    def post(self, request):
+        serializer = ComplaintSerializer(data=request.data, context={'request': request})
+
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+
+            return Response(
+                {"message": "Complaint submitted successfully"},
+                status=status.HTTP_201_CREATED
+            )
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class AdminComplaintListView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUserType]
+
+    def get(self, request):
+        complaints = Complaint.objects.all().order_by('-created_at')
+
+        # Optional filter
+        status_filter = request.GET.get("status")
+        if status_filter:
+            complaints = complaints.filter(status=status_filter)
+
+        serializer = ComplaintSerializer(complaints, many=True)
+        return Response(serializer.data)
+
+
+class AdminUpdateComplaintView(APIView):
+    permission_classes = [IsAuthenticated, IsAdminUserType]
+
+    def patch(self, request, pk):
+        try:
+            complaint = Complaint.objects.get(id=pk)
+        except Complaint.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        complaint.status = request.data.get("status", complaint.status)
+        complaint.save()
+
+        return Response({"message": "Status updated"})

@@ -8,7 +8,7 @@ from .models import (
     EducationEntry, WorkExperienceEntry, Skill, LanguageKnown, Certification,
     Company, Job, JobApplication, SavedJob,
     NewsletterSubscriber, Notification, Conversation, Message, ContactMessage, 
-    CompanyVerification, PostAJob,
+    CompanyVerification, PostAJob,Complaint,
 )
 
 User = get_user_model()
@@ -290,7 +290,8 @@ class JobSeekerProfileReadSerializer(serializers.ModelSerializer):
         return obj.resume_file.url if obj.resume_file else None
 
 
-class JobSeekerProfileWriteSerializer(WritableNestedModelSerializer):
+class JobSeekerProfileWriteSerializer(serializers.ModelSerializer):
+
     educations = EducationEntrySerializer(many=True, required=False)
     experiences = WorkExperienceEntrySerializer(many=True, required=False)
     skills = SkillSerializer(many=True, required=False)
@@ -301,10 +302,48 @@ class JobSeekerProfileWriteSerializer(WritableNestedModelSerializer):
         model = JobSeekerProfile
         exclude = ['id', 'user', 'created_at', 'updated_at']
 
-    def validate(self, data):
-        if data.get('dob') and data['dob'] > timezone.now().date():
-            raise serializers.ValidationError({"dob": "Date of birth cannot be in the future."})
-        return data
+    def update(self, instance, validated_data):
+
+        educations_data = validated_data.pop('educations', [])
+        experiences_data = validated_data.pop('experiences', [])
+        skills_data = validated_data.pop('skills', [])
+        languages_data = validated_data.pop('languages', [])
+        certifications_data = validated_data.pop('certifications', [])
+
+        # Update profile fields
+        for attr, value in validated_data.items():
+            setattr(instance, attr, value)
+
+        instance.save()
+
+        profile = instance
+
+        # -------- Skills --------
+        Skill.objects.filter(profile=profile).delete()
+        for skill in skills_data:
+            Skill.objects.create(profile=profile, **skill)
+
+        # -------- Languages --------
+        LanguageKnown.objects.filter(profile=profile).delete()
+        for language in languages_data:
+            LanguageKnown.objects.create(profile=profile, **language)
+
+        # -------- Educations --------
+        EducationEntry.objects.filter(profile=profile).delete()
+        for edu in educations_data:
+            EducationEntry.objects.create(profile=profile, **edu)
+
+        # -------- Experiences --------
+        WorkExperienceEntry.objects.filter(profile=profile).delete()
+        for exp in experiences_data:
+            WorkExperienceEntry.objects.create(profile=profile, **exp)
+
+        # -------- Certifications --------
+        Certification.objects.filter(profile=profile).delete()
+        for cert in certifications_data:
+            Certification.objects.create(profile=profile, **cert)
+
+        return instance
 
 
 
@@ -857,3 +896,39 @@ class PostAJobSerializer(serializers.ModelSerializer):
 class VerifyEmailOTPSerializer(serializers.Serializer):
     email = serializers.EmailField()
     otp = serializers.CharField(max_length=6)
+
+# Report a Job Serializer
+
+class ComplaintSerializer(serializers.ModelSerializer):
+
+    firstName = serializers.CharField(source='first_name')
+    lastName = serializers.CharField(source='last_name')
+
+    class Meta:
+        model = Complaint
+        fields = [
+            'id',
+            'firstName',
+            'lastName',
+            'mobile',
+            'email',
+            'reason',
+            'explanation',
+            'status',
+            'created_at'
+        ]
+        read_only_fields = ['status', 'created_at']
+
+    def validate_mobile(self, value):
+        if not value.isdigit() or len(value) != 10:
+            raise serializers.ValidationError("Enter valid 10-digit mobile number")
+        return value
+
+    def validate(self, data):
+        user = self.context['request'].user
+
+        
+        if Complaint.objects.filter(user=user, reason=data.get('reason')).exists():
+            raise serializers.ValidationError("You already submitted this complaint")
+
+        return data

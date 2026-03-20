@@ -766,3 +766,39 @@ class EmailOTP(models.Model):
 
     def is_valid(self):
         return timezone.now() < self.expires_at and not self.is_verified        
+
+# Report a Job
+
+class Complaint(models.Model):
+
+    class Status(models.TextChoices):
+        PENDING = 'pending', 'Pending'
+        RESOLVED = 'resolved', 'Resolved'
+
+    user = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        related_name="complaints"
+    )
+
+    first_name = models.CharField(max_length=100)
+    last_name = models.CharField(max_length=100)
+    mobile = models.CharField(max_length=10)
+    email = models.EmailField()
+
+    reason = models.CharField(max_length=255)
+    explanation = models.TextField()
+
+    status = models.CharField(
+        max_length=20,
+        choices=Status.choices,
+        default=Status.PENDING
+    )
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"{self.first_name} - {self.reason}"

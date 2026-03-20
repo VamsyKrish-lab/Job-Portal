@@ -1,11 +1,11 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import './MyProfile.css'
 import { Link } from 'react-router-dom';
 import addPhoto from '../assets/AddPhoto.png'
 import editIcon from '../assets/EditIcon.png'
 import uploadIcon from '../assets/UploadIcon.png'
 import deleteIcon from '../assets/DeleteIcon.png'
-import { JHeader } from './JHeader';
+import { Header } from "../Components-LandingPage/Header";
 import { useEffect } from "react";
 import api from "../api/axios";
 
@@ -54,7 +54,6 @@ const Profile = ({ data, onChange, onReset, onNext, setProfilePhoto }) => {
     const [photoPreview, setPhotoPreview] = useState(null);
     const [resumeFile, setResumeFile] = useState(null);
 
-
     const handlePhotoChange = (e) => {
         const file = e.target.files[0];
         if (!file) return;
@@ -77,7 +76,6 @@ const Profile = ({ data, onChange, onReset, onNext, setProfilePhoto }) => {
         e.preventDefault();
         const newErrors = {};
 
-
         if (!data.fullName?.trim()) newErrors.fullName = "*Full Name is required";
         else if (!AlphaOnlyreg.test(data.fullName)) newErrors.fullName = "*Please use letters only; no spaces or numbers allowed";
         if (data.gender === "Select") newErrors.gender = "*Please select a gender";
@@ -94,7 +92,40 @@ const Profile = ({ data, onChange, onReset, onNext, setProfilePhoto }) => {
             alert("Please fill all required fields.");
         }
     };
+    // const triggerInput = () => {
+    //     document.getElementById('profilephoto').click();
+    // };
 
+    // const handleFileEvent = (e) => {
+    //     const file = e.target.files[0];
+    //     if (file) {
+    //         // Validation: Check if file size is > 500KB (512000 bytes)
+    //         if (file.size > 512000) {
+    //             setErrors({ ...errors, profilePhoto: "*Image size must be below 500KB" });
+    //             return;
+    //         }
+
+    //         // Clear error if valid
+    //         setErrors({ ...errors, profilePhoto: '' });
+
+    //         handleChange({
+    //             target: {
+    //                 name: 'profilePhoto',
+    //                 value: file
+    //             }
+    //         });
+    //     }
+    // };
+
+    // const removePhoto = () => {
+    //     if (window.confirm("Are you sure you want to remove this photo?")) {
+    //         handleChange({
+    //             target: { name: 'profilePhoto', value: null }
+    //         });
+    //         document.getElementById('profilephoto').value = "";
+    //         setErrors({ ...errors, profilePhoto: '' });
+    //     }
+    // };
     return (
         <form className="content-card" onSubmit={handleSubmit}>
             <div className="profile-header">
@@ -342,7 +373,7 @@ const ResumeSection = ({ data, onChange, onReset, onNext, setResumeFile, resumeF
                 <small>Allowed formats: PDF, DOC, DOCX</small>
             </div>
 
-            {/* ✅ SHOW SELECTED FILE NAME */}
+            
             {resumeFile && (
                 <small style={{ color: "green", marginTop: "8px", display: "block" }}>
                     Selected file: {resumeFile.name}
@@ -358,11 +389,11 @@ const ResumeSection = ({ data, onChange, onReset, onNext, setResumeFile, resumeF
             />
 
             <div className="form-group full-width">
-                <label>Portfolio / Website Link</label>
+                <label>Portfolio_link / Website Link</label>
                 <input
                     type="url"
-                    name="portfolio"
-                    value={data.portfolio || ""}
+                    name="portfolio_link"
+                    value={data.portfolio_link || ""}
                     onChange={onChange}
                     placeholder="Enter URL"
                 />
@@ -378,7 +409,7 @@ const ResumeSection = ({ data, onChange, onReset, onNext, setResumeFile, resumeF
 };
 
 
-const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAddGrad, onRemoveGrad, onReset, onNext }) => {
+const EducationDetails = ({ data, onHighestQualChange, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAddGrad, onRemoveGrad, onReset, onNext }) => {
     const [openSection, setOpenSection] = useState(null);
     const toggleSection = (id) => setOpenSection(openSection === id ? null : id);
     const today = new Date().toISOString().split('T')[0];
@@ -412,6 +443,51 @@ const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAdd
             newErrors.hscyear = "Year cannot be in the future";
         }
 
+        // data.graduations.forEach((grad, index) => {
+        //     if (!grad.degree || grad.degree.trim() === "") {
+        //         newErrors[`graddegree${index}`] = "Degree is required";
+        //     }
+        //     if (!grad.status || grad.status === "Select") {
+        //         newErrors[`gradstatus${index}`] = "Please select degree status";
+        //     }
+        //     if (!grad.college || grad.college.trim() === "") {
+        //         newErrors[`gradcollege${index}`] = "Institution name is required";
+        //     }
+        //     if (!grad.percentage || grad.percentage.trim() === "") {
+        //         newErrors[`gradpercentage${index}`] = "Percentage is required";
+        //     } else if (!percentageReg.test(grad.percentage)) newErrors[`gradpercentage${index}`] = "Invalid format"
+        //     if (!grad.startYear) {
+        //         newErrors[`gradstartYear${index}`] = "Starting year is required";
+        //     }
+        //     if (!grad.city) {
+        //         newErrors[`gradcity${index}`] = "City is required";
+        //     }
+        //     if (!grad.state) {
+        //         newErrors[`gradstate${index}`] = "State is required";
+        //     }
+        //     if (!grad.country) {
+        //         newErrors[`gradcountry${index}`] = "Country is required";
+        //     }
+        //     if (!grad.dept) {
+        //         newErrors[`graddepartment${index}`] = "department is required";
+        //     }
+        //     if (!grad.endYear) {
+        //         newErrors[`gradendYear${index}`] = "Ending year is required";
+        //     } else if (new Date(grad.endYear) < new Date(grad.startYear)) {
+        //         newErrors[`gradendYear${index}`] = "Ending year cannot be before starting year";
+        //     }
+        //     else if (grad.startYear) {
+        //         const start = new Date(grad.startYear);
+        //         const end = new Date(grad.endYear);
+
+        //         if (end < start) {
+        //             newErrors[`gradendYear${index}`] = "Ending year cannot be before starting year";
+        //         }
+        //         else if (end.getFullYear() - start.getFullYear() < 1) {
+        //             newErrors[`gradendYear${index}`] = "Course duration must be at least 1 year";
+        //         }
+        //     }
+        // });
 
         setErrors(newErrors);
         if (Object.keys(newErrors).length === 0) {
@@ -431,7 +507,7 @@ const EducationDetails = ({ data, onUpdateSSLC, onUpdateHSC, onUpdateGrad, onAdd
 
             <div className="form-group full-width" style={{ marginBottom: '1.5rem' }}>
                 <label>Highest Qualification?</label>
-                <select name="highestQual" value={data.highestQual} onChange={onUpdateSSLC}>
+                <select name="highestQual" value={data.highestQual} onChange={onHighestQualChange}>
                     <option value="Select">Select</option><option value="Diploma">Diploma</option><option value="Under-Graduation">Under-Graduation</option><option value="Post-Graduation">Post-Graduation</option><option value="Doctorate">Doctorate</option>
                 </select>
                 {errors.highestQual && <span className="error-msg">{errors.highestQual}</span>}
@@ -581,10 +657,11 @@ const WorkExperience = ({ data, onChange, onUpdateEntry, onAddEntry, onRemoveEnt
                                     <label>Industry / Domain</label>
                                     <select name="industry" value={entry.industry} onChange={(e) => onUpdateEntry(entry.id, e)}>
                                         <option value="Select">Select</option>
-                                        <option value="IT">IT - Software</option>
+                                        <option value="IT-Software">IT - Software</option>
                                         <option value="Finance">Finance</option>
-                                        <option value="Marketing">Marketing</option>
                                         <option value="Education">Education</option>
+                                        <option value="Marketing">Marketing</option>
+                                        <option value="Other">Other</option>
                                     </select>
                                 </div>
                                 <div className="form-group">
@@ -697,6 +774,19 @@ const LanguagesKnown = ({ languages, onAdd, onUpdate, onDelete, onReset, onNext 
 };
 
 const Certifications = ({ certs, onAdd, onUpdate, onDelete, onReset, onNext }) => {
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const allowedTypes = ["application/pdf", "image/png", "image/jpeg"];
+        if (!allowedTypes.includes(file.type)) {
+            alert("Only PDF, PNG, JPG allowed");
+            return;
+        }
+
+        setCurrentCert(prev => ({ ...prev, file }));
+    };
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editIndex, setEditIndex] = useState(null);
     const [currentCert, setCurrentCert] = useState({ name: "", file: null });
@@ -721,13 +811,46 @@ const Certifications = ({ certs, onAdd, onUpdate, onDelete, onReset, onNext }) =
                 <button type="button" className="reset-link" onClick={onReset}>Reset</button>
             </div>
             <div className="skills-list">
-                {certs.map((cert, index) => (<EditableListItem key={index} title={cert.name} onEdit={() => openEdit(index)} />))}
+                {certs.map((cert, index) => (
+                    <div key={index} className="skill-item">
+                        <span>{cert.name}</span>
+
+                        {cert.url && (
+                            <a
+                                href={cert.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                style={{ marginLeft: "10px", fontSize: "0.85rem" }}
+                            >
+                                View
+                            </a>
+                        )}
+
+                        <button type="button" onClick={() => openEdit(index)} className="edit-skill-btn">
+                            <img className='edit-icon-btn' src={editIcon} alt='edit' />
+                        </button>
+                    </div>
+                ))}
             </div>
             <button type="button" className="add-link" onClick={openAdd}>+ Add another certification</button>
             <div className="form-actions"><button type="submit" className="btn btn-primary">Save & Continue</button></div>
             <PopupModal title={editIndex !== null ? "Edit Certification" : "Add Certification"} isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSave={handleSave} onDelete={handleDelete} mode={editIndex !== null ? 'edit' : 'add'}>
                 <div className="form-group" style={{ marginBottom: '1rem' }}><label>Certification Name *</label><input type="text" value={currentCert.name} onChange={(e) => setCurrentCert({ ...currentCert, name: e.target.value })} placeholder="e.g., Full-stack development" /></div>
-                <div className="form-group"><label>Upload Certificate (PDF, PNG, JPEG)</label><div style={{ border: '1px solid #ddd', padding: '8px', borderRadius: '6px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', background: '#fff' }}><span style={{ color: currentCert.file ? '#333' : '#999', fontSize: '0.9rem' }}>{currentCert.file ? "File Selected" : "Not Uploaded"}</span><span style={{ fontSize: '1.2rem', color: '#666' }}>⋮</span></div></div>
+                <div className="form-group">
+                    <label>Upload Certificate (PDF, PNG, JPEG)</label>
+
+                    <input
+                        type="file"
+                        accept=".pdf,.png,.jpg,.jpeg"
+                        onChange={handleFileChange}
+                    />
+
+                    {currentCert.file && (
+                        <small style={{ color: "green" }}>
+                            Selected: {currentCert.file.name}
+                        </small>
+                    )}
+                </div>
             </PopupModal>
         </form>
     );
@@ -735,7 +858,7 @@ const Certifications = ({ certs, onAdd, onUpdate, onDelete, onReset, onNext }) =
 
 // --- FINAL SUBMIT BUTTON SECTION ---
 const Preferences = ({ data, onChange, onReset, onSubmitFinal, saving }) => {
-    const NumRegex = /^\d+$/;
+    const NumRegex = /^[0-9,]+$/;
     const [errors, setErrors] = useState({});
 
     const handleSubmit = (e) => {
@@ -743,21 +866,21 @@ const Preferences = ({ data, onChange, onReset, onSubmitFinal, saving }) => {
 
         const newErrors = {};
 
-        // ✅ Current CTC
+        //  Current CTC
         if (!data.currentCTC) {
             newErrors.currentCTC = "Required";
         } else if (!NumRegex.test(data.currentCTC)) {
             newErrors.currentCTC = "Salary in numbers only";
         }
 
-        // ✅ Expected CTC
+        //  Expected CTC
         if (!data.expectedCTC) {
             newErrors.expectedCTC = "Required";
         } else if (!NumRegex.test(data.expectedCTC)) {
             newErrors.expectedCTC = "Salary in numbers only";
         }
 
-        // ✅ Other validations
+        //  Other validations
         if (!data.jobType || data.jobType === 'Select') {
             newErrors.jobType = "Please select a job type";
         }
@@ -836,6 +959,159 @@ export const MyProfile = () => {
     const [profilePhoto, setProfilePhoto] = useState(null);
     const [resumeFile, setResumeFile] = useState(null);
     const [saving, setSaving] = useState(false);
+    const fetchProfile = async () => {
+        try {
+            const token = localStorage.getItem("access");
+            if (!token) {
+                
+                window.location.href = "/login";
+                return;
+            }
+            const res = await api.get("profile/jobseeker/");
+            console.log(" Received Profile Data:", res.data); // Debug log
+
+            setAllData(prev => ({
+                ...prev,
+
+                profile: {
+                    fullName: res.data.full_name || "",
+                    gender: res.data.gender || "Select",
+                    dob: res.data.dob || "",
+                    maritalStatus: res.data.marital_status || "Select",
+                    nationality: res.data.nationality || "",
+                },
+
+                currentDetails: {
+                    jobTitle: res.data.current_job_title || "",
+                    company: res.data.current_company || "",
+                    experience: res.data.total_experience_years || "",
+                    noticePeriod: res.data.notice_period || "Select",
+                    currentLocation: res.data.current_location || "",
+                    prefLocation: res.data.preferred_locations || "",
+                },
+
+                contact: {
+                    mobile: res.data.phone || "",
+                    email: res.data.email || "",
+                    altMobile: res.data.alternate_phone || "",
+                    altEmail: res.data.alternate_email || "",
+                    address: res.data.full_address || "",
+                    street: res.data.street || "",
+                    city: res.data.city || "",
+                    state: res.data.state || "",
+                    pincode: res.data.pincode || "",
+                    country: res.data.country || "",
+                },
+
+                resume: {
+                    portfolio_link: res.data.portfolio_link || ""
+                },
+
+                education: {
+                    highestQual:
+                        res.data.educations?.some(e => e.qualification_level === "Doctorate")
+                            ? "Doctorate"
+                            : res.data.educations?.some(e => e.qualification_level === "Post-Graduation")
+                                ? "Post-Graduation"
+                                : res.data.educations?.some(e => e.qualification_level === "Graduation")
+                                    ? "Under-Graduation"
+                                    : res.data.educations?.some(e => e.qualification_level === "Diploma")
+                                        ? "Diploma"
+                                        : "Select",
+
+
+                    sslc: res.data.educations?.find(e => e.qualification_level === "SSLC")
+                        ? {
+                            id: res.data.educations.find(e => e.qualification_level === "SSLC").id,
+                            institution: res.data.educations.find(e => e.qualification_level === "SSLC").institution,
+                            percentage: res.data.educations.find(e => e.qualification_level === "SSLC").percentage_or_cgpa,
+                            location: res.data.educations.find(e => e.qualification_level === "SSLC").location,
+                            year: res.data.educations.find(e => e.qualification_level === "SSLC").completion_year,
+                        }
+                        : { institution: '', percentage: '', location: '', year: '' },
+
+                    hsc: res.data.educations?.find(e => e.qualification_level === "HSC")
+                        ? {
+                            id: res.data.educations.find(e => e.qualification_level === "HSC").id,
+                            stream: res.data.educations.find(e => e.qualification_level === "HSC").post_10th_study,
+                            institution: res.data.educations.find(e => e.qualification_level === "HSC").institution,
+                            location: res.data.educations.find(e => e.qualification_level === "HSC").location,
+                            year: res.data.educations.find(e => e.qualification_level === "HSC").completion_year,
+                            percentage: res.data.educations.find(e => e.qualification_level === "HSC").percentage_or_cgpa,
+                        }
+                        : { stream: 'Select', institution: '', location: '', year: '', percentage: '' },
+
+                    graduations: res.data.educations
+                        ?.filter(e => e.qualification_level === "Graduation")
+                        .map(e => ({
+                            id: e.id,
+                            degree: e.degree,
+                            status: e.status,
+                            dept: e.department,
+                            percentage: e.percentage_or_cgpa,
+                            startYear: e.start_year,
+                            endYear: e.end_year,
+                            college: e.institution,
+                            city: e.city,
+                            state: e.state,
+                            country: e.country,
+                        })) || []
+                },
+
+                experience: {
+                    status: res.data.experiences?.length ? "Experienced" : "Fresher",
+                    hasExperience: res.data.experiences?.length ? "Yes" : "No",
+                    entries: res.data.experiences?.map(e => ({
+                        id: e.id,
+                        title: e.job_title,
+                        company: e.company_name,
+                        startDate: e.start_date,
+                        endDate: e.end_date,
+                        industry: e.industry_domain,
+                        jobType: e.job_type,
+                        location: e.location,
+                        responsibilities: e.key_responsibilities,
+                    })) || []
+                },
+
+                skills: res.data.skills?.map(s => s.name) || [],
+
+
+
+                languages: res.data.languages?.map(l => ({
+                    name: l.name,
+                    proficiency: l.proficiency
+                })) || [],
+
+
+
+                certs: (res.data.certifications || []).map(cert => ({
+                    id: cert.id,
+                    name: cert.name,
+                    file: null,
+                    url: cert.certificate_url
+                })),
+
+                preferences: {
+                    currentCTC: res.data.current_ctc || "",
+                    expectedCTC: res.data.expected_ctc || "",
+                    jobType: res.data.preferred_job_type || "Select",
+                    role: res.data.preferred_role_industry || "",
+                    ready: res.data.ready_to_start_immediately ? "Yes" : "No",
+                    relocate: res.data.willing_to_relocate ? "Yes" : "No",
+                },
+
+            }));
+        } catch (err) {
+            console.error("Failed to load profile", err);
+            if (err.response?.status === 401) {
+                alert("your session time expired, please login again");
+                localStorage.clear();
+                window.location.href = "/Job-portal/jobseeker/login";
+            }
+        }
+    };
+
 
 
 
@@ -854,448 +1130,717 @@ export const MyProfile = () => {
     ];
 
     const [allData, setAllData] = useState({
-        profile: { fullName: '', gender: 'Select', dob: '', maritalStatus: 'Select', nationality: '' },
-        currentDetails: { jobTitle: '', company: '', experience: '', noticePeriod: 'Select', currentLocation: '', prefLocation: '' },
-        contact: { mobile: '', altMobile: '', email: '', altEmail: '', address: '', street: '', city: '', state: '', pincode: '', country: '' },
-        resume: { portfolio: '' },
-        education: { highestQual: 'Select', sslc: { institution: '', percentage: '', location: '', year: '' }, hsc: { stream: 'Select', institution: '', location: '', year: '', percentage: '' }, graduations: [{ id: 1, degree: '', status: 'Select', dept: '', percentage: '', startYear: '', endYear: '', college: '', city: '', state: '', country: '' }] },
-        experience: { status: 'Fresher', hasExperience: 'No', entries: [{ id: 1, title: '', company: '', startDate: '', endDate: '', industry: 'Select', jobType: 'Select', location: '', responsibilities: '' }] },
-        skills: ["User Research", "Problem solving", "Figma"],
-        languages: [{ name: "English", proficiency: "Fluent" }, { name: "Tamil", proficiency: "Native" }],
-        certs: [{ name: "Full-Stack Development", file: "cert1.pdf" }, { name: "UI/UX Design", file: "cert2.pdf" }],
+        profile: {
+            fullName: '',
+            gender: 'Select',
+            dob: '',
+            maritalStatus: 'Select',
+            nationality: ''
+        },
+
+        currentDetails: {
+            jobTitle: '',
+            company: '',
+            experience: '',
+            noticePeriod: 'Select',
+            currentLocation: '',
+            prefLocation: ''
+        },
+
+        contact: {
+            mobile: '',
+            altMobile: '',
+            email: '',
+            altEmail: '',
+            address: '',
+            street: '',
+            city: '',
+            state: '',
+            pincode: '',
+            country: ''
+        },
+
+        resume: {
+            portfolio_link: ''
+        },
+
+        education: {
+            highestQual: 'Select',
+            sslc: { institution: '', percentage: '', location: '', year: '' },
+            hsc: { stream: 'Select', institution: '', location: '', year: '', percentage: '' },
+            graduations: []
+        },
+
+        experience: {
+            status: 'Fresher',
+            hasExperience: 'No',
+            entries: []
+        },
+
+        skills: [],
+        languages: [],
+        certs: [],
+
         preferences: {
-            currentCTC: '', expectedCTC: '', jobType: 'Select', role: '', ready: '', relocate: ''
+            currentCTC: '',
+            expectedCTC: '',
+            jobType: 'Select',
+            role: '',
+            ready: '',
+            relocate: ''
         }
     });
+
     useEffect(() => {
-        const fetchProfile = async () => {
-            try {
-                const res = await api.get("profile/jobseeker/");
-                setAllData(prev => ({
-                    ...prev,
-                    profile: {
-                        fullName: res.data.full_name || "",
-                        gender: res.data.gender || "Select",
-                        dob: res.data.dob || "",
-                        maritalStatus: res.data.marital_status || "Select",
-                        nationality: res.data.nationality || "",
-                    },
-                    currentDetails: {
-                        jobTitle: res.data.current_job_title || "",
-                        company: res.data.current_company || "",
-                        experience: res.data.total_experience_years || "",
-                        noticePeriod: res.data.notice_period || "Select",
-                        currentLocation: res.data.current_location || "",
-                        prefLocation: res.data.preferred_locations || "",
-                    },
-                    contact: {
-                        mobile: res.data.phone || "",
-                        email: res.data.email || "",
-                        altMobile: res.data.alternate_phone || "",
-                        altEmail: res.data.alternate_email || "",
-                        address: res.data.full_address || "",
-                        street: res.data.street || "",
-                        city: res.data.city || "",
-                        state: res.data.state || "",
-                        pincode: res.data.pincode || "",
-                        country: res.data.country || "",
-                    },
-                    preferences: {
-                        currentCTC: res.data.current_ctc || "",
-                        expectedCTC: res.data.expected_ctc || "",
-                        jobType: res.data.preferred_job_type || "Select",
-                        role: res.data.preferred_role_industry || "",
-                        ready: res.data.ready_to_start_immediately ? "Yes" : "No",
-                        relocate: res.data.willing_to_relocate ? "Yes" : "No",
-                    }
-                }));
-
-            } catch (err) {
-                console.error("Failed to load profile", err);
-                if (err.response?.status === 401) {
-                    alert("Session expired. Please login again.");
-                }
-            }
-        };
-
         fetchProfile();
     }, []);
-
-    // --- NAVIGATION LOGIC ---
-    const handleNextStep = () => {
-        const currentIndex = steps.indexOf(activeItem);
-        if (currentIndex < steps.length - 1) {
-            const nextItem = steps[currentIndex + 1];
-            setActiveItem(nextItem);
-
-            // Auto-open Dropdowns
-            if (['Profile', 'Current Details', 'Contact Details'].includes(nextItem)) setOpenDropdown('Basic Details');
-            else if (['Key Skills', 'Languages Known', 'Certifications'].includes(nextItem)) setOpenDropdown('Skills & Certifications');
-        }
-    };
-
-    const handleFinalSubmit = async () => {
-        if (saving) return;
-        setSaving(true);
-
-        const today = new Date().toISOString().split('T')[0];
-        const AlphaOnlyreg = /^[A-Za-z]+(?: [A-Za-z]+)*$/;
-        const percentageReg = /^(\d{1,2}(\.\d{1,2})?|100(\.0{1,2})?)%?$/;
-
-
-        // --- 1. PROFILE VALIDATION ---
-        const profile = allData.profile;
-        const isProfileValid =
-            profile.fullName?.trim() &&
-            AlphaOnlyreg.test(profile.fullName) &&
-            profile.gender !== "Select" &&
-            profile.dob &&
-            profile.dob <= today &&
-            profile.maritalStatus !== "Select" &&
-            profile.nationality?.trim();
-
-        if (!isProfileValid) {
-            alert("*fill the Required field in the Profile section.");
-            return;
-        }
-
-        const current = allData.currentDetails;
-        const isCurrentdetailsValid =
-            current.company.trim() &&
-            current.currentLocation.trim() &&
-            current.experience &&
-            current.jobTitle.trim() &&
-            current.prefLocation.trim() &&
-            current.noticePeriod !== 'Select';
-
-
-
-
-
-        if (!isCurrentdetailsValid) {
-            alert("*fill the Required field in the Current Details section.");
-            return;
-        }
-
-        // --- 2. EDUCATION VALIDATION ---
-        const edu = allData.education;
-        const isSslcValid =
-            edu.sslc.institution &&
-            edu.sslc.location &&
-            edu.sslc.year &&
-            edu.sslc.year <= today &&
-            percentageReg.test(edu.sslc.percentage);
-
-        const isHscValid =
-            edu.hsc.stream !== 'Select' &&
-            edu.hsc.institution &&
-            edu.hsc.year &&
-            edu.hsc.year <= today &&
-            percentageReg.test(edu.hsc.percentage);
-
-        if (!isSslcValid || !isHscValid) {
-            alert("*required SSLC and HSC details with valid percentages and years.");
-            return;
-        }
-        const Contactdetails = allData.contact;
-        const isContactdetailsValid =
-            Contactdetails.mobile &&
-            Contactdetails.email.trim() &&
-            Contactdetails.city.trim() &&
-            Contactdetails.country.trim() &&
-            Contactdetails.state.trim() &&
-            Contactdetails.street.trim() &&
-            Contactdetails.pincode;
-
-
-
-        if (!isContactdetailsValid) {
-            alert("*fill the Required field in the Contact Details section");
-            return;
-        }
-
-        // --- 3. WORK EXPERIENCE VALIDATION ---
-        const work = allData.experience;
-        let isWorkValid = true;
-        if (work.status === 'Experienced') {
-            // Check if all entries have the core required fields
-            isWorkValid = work.entries.every(entry =>
-                entry.title?.trim() !== "" && entry.company?.trim() !== ""
-            );
-        }
-
-        if (!isWorkValid) {
-            alert("*Work experience details Required.");
-            return;
-        }
-
-        // --- 4. PREFERENCES VALIDATION ---
-        const prefs = allData.preferences;
-
-        const NumRegex = /^\d+$/;
-
-        if (
-            !NumRegex.test(prefs.currentCTC) ||
-            !NumRegex.test(prefs.expectedCTC)
-        ) {
-            alert("*CTC values must be numbers only.");
-            return;
-        }
-
-        const isPreferencesValid =
-            prefs.currentCTC &&
-            prefs.expectedCTC &&
-            prefs.jobType !== 'Select' &&
-            prefs.role &&
-            prefs.ready &&
-            prefs.relocate;
-
-        if (!isPreferencesValid) {
-            alert("*Fill required fields in Preferences section.");
-            return;
-        }
-
-        if (isProfileValid && isSslcValid && isHscValid && isWorkValid && isPreferencesValid) {
-            try {
-                const formData = new FormData();
-
-                // 🔹 Profile photo
-                if (profilePhoto instanceof File) {
-                    formData.append("profile_photo", profilePhoto);
-                }
-
-                // 🔹 Resume file
-                if (resumeFile instanceof File) {
-                    formData.append("resume_file", resumeFile);
-                }
-
-
-
-                // 🔹 Profile
-                formData.append("full_name", allData.profile.fullName);
-                formData.append("gender", allData.profile.gender);
-                formData.append("dob", allData.profile.dob);
-                formData.append("marital_status", allData.profile.maritalStatus);
-                formData.append("nationality", allData.profile.nationality);
-                formData.append("current_job_title", allData.currentDetails.jobTitle);
-                formData.append("current_company", allData.currentDetails.company);
-                formData.append("total_experience_years", allData.currentDetails.experience);
-                formData.append("notice_period", allData.currentDetails.noticePeriod);
-                formData.append("current_location", allData.currentDetails.currentLocation);
-                formData.append("preferred_locations", allData.currentDetails.prefLocation);
-                formData.append("phone", allData.contact.mobile);
-                formData.append("email", allData.contact.email);
-                formData.append("alternate_phone", allData.contact.altMobile);
-                formData.append("alternate_email", allData.contact.altEmail);
-                formData.append("full_address", allData.contact.address);
-                formData.append("street", allData.contact.street);
-                formData.append("city", allData.contact.city);
-                formData.append("state", allData.contact.state);
-                formData.append("pincode", allData.contact.pincode);
-                formData.append("country", allData.contact.country);
-                formData.append("current_ctc", allData.preferences.currentCTC);
-                formData.append("expected_ctc", allData.preferences.expectedCTC);
-                formData.append("preferred_job_type", allData.preferences.jobType);
-                formData.append("preferred_role_industry", allData.preferences.role);
-                formData.append(
-                    "ready_to_start_immediately",
-                    allData.preferences.ready === "Yes"
-                );
-                formData.append(
-                    "willing_to_relocate",
-                    allData.preferences.relocate === "Yes"
-                );
-                // 🔹 Portfolio
-                formData.append("portfolio", allData.resume.portfolio);
-                // 🔹 Education
-                formData.append("education", JSON.stringify(allData.education));
-                // 🔹 Work Experience
-                formData.append("experience", JSON.stringify(allData.experience));
-                // 🔹 Skills
-                formData.append("skills", JSON.stringify(allData.skills));
-
-                // 🔹 Languages
-                formData.append("languages", JSON.stringify(allData.languages));
-
-                // 🔹 Certifications
-                formData.append("certifications", JSON.stringify(allData.certs));
-
-
-
-
-
-                // (You can append more fields later)
-
-                try {
-                    await api.patch("profile/jobseeker/", formData, {
-                        headers: { "Content-Type": "multipart/form-data" },
-                    });
-
-                    alert("Profile saved successfully!");
-                } catch (err) {
-                    console.error("Profile save failed", err);
-                    alert("Failed to save profile. Try again.");
-                } finally {
-                    setSaving(false); // ✅ VERY IMPORTANT
-                }
-            } catch (err) {
-                console.error("Profile save failed", err);
-                alert("Failed to save profile. Try again.");
+    const handleHighestQualChange = (e) => {
+        const { value } = e.target;
+        setAllData(prev => ({
+            ...prev,
+            education: {
+                ...prev.education,
+                highestQual: value
             }
-
-
-        }
+        }));
     };
 
-    const handleUpdate = (section, e) => {
+    const handleUpdateSSLC = (e) => {
         const { name, value } = e.target;
         setAllData(prev => ({
             ...prev,
-            [section]: {
-                ...prev[section],
+            education: {
+                ...prev.education,
+                sslc: { ...prev.education.sslc, [name]: value }
+            }
+        }));
+    };
+
+    const handleUpdateHSC = (e) => {
+        const { name, value } = e.target;
+        setAllData(prev => ({
+            ...prev,
+            education: {
+                ...prev.education,
+                hsc: { ...prev.education.hsc, [name]: value }
+            }
+        }));
+    };
+
+    const handleUpdateGrad = (id, e) => {
+        const { name, value } = e.target;
+        setAllData(prev => ({
+            ...prev,
+            education: {
+                ...prev.education,
+                graduations: prev.education.graduations.map(g =>
+                    g.id === id ? { ...g, [name]: value } : g
+                )
+            }
+        }));
+    };
+
+    const handleAddGrad = () => {
+        setAllData(prev => ({
+            ...prev,
+            education: {
+                ...prev.education,
+                graduations: [
+                    ...prev.education.graduations,
+                    {
+                        id: `temp-${Date.now()}`,
+                        degree: '',
+                        status: 'Select',
+                        dept: '',
+                        percentage: '',
+                        startYear: '',
+                        endYear: '',
+                        college: '',
+                        city: '',
+                        state: '',
+                        country: ''
+                    }
+                ]
+            }
+        }));
+    };
+
+    const handleRemoveGrad = (id) => {
+        setAllData(prev => ({
+            ...prev,
+            education: {
+                ...prev.education,
+                graduations: prev.education.graduations.filter(g => g.id !== id)
+            }
+        }));
+    };
+// Continue from where it was cut off...
+
+    const handleExpUpdateEntry = (id, e) => {
+        const { name, value } = e.target;
+        setAllData(prev => ({
+            ...prev,
+            experience: {
+                ...prev.experience,
+                entries: prev.experience.entries.map(entry =>
+                    entry.id === id ? { ...entry, [name]: value } : entry
+                )
+            }
+        }));
+    };
+
+    const handleExpAddEntry = () => {
+        setAllData(prev => ({
+            ...prev,
+            experience: {
+                ...prev.experience,
+                entries: [
+                    ...prev.experience.entries,
+                    {
+                        id: `temp-${Date.now()}`,
+                        title: '',
+                        company: '',
+                        startDate: '',
+                        endDate: '',
+                        industry: 'Select',
+                        jobType: 'Select',
+                        location: '',
+                        responsibilities: ''
+                    }
+                ]
+            }
+        }));
+    };
+
+    const handleExpRemoveEntry = (id) => {
+        setAllData(prev => ({
+            ...prev,
+            experience: {
+                ...prev.experience,
+                entries: prev.experience.entries.filter(entry => entry.id !== id)
+            }
+        }));
+    };
+
+    const handleExpChange = (e) => {
+        const { name, value } = e.target;
+        setAllData(prev => ({
+            ...prev,
+            experience: {
+                ...prev.experience,
                 [name]: value
             }
         }));
     };
 
-
-    // --- Education Handlers ---
-    const handleUpdateSSLC = (e) => {
-        const { name, value } = e.target;
-        if (name === 'highestQual') setAllData(prev => ({ ...prev, education: { ...prev.education, highestQual: value } }));
-        else setAllData(prev => ({ ...prev, education: { ...prev.education, sslc: { ...prev.education.sslc, [name]: value } } }));
-    };
-    const handleUpdateHSC = (e) => {
-        const { name, value } = e.target;
-        setAllData(prev => ({ ...prev, education: { ...prev.education, hsc: { ...prev.education.hsc, [name]: value } } }));
-    };
-    const handleUpdateGrad = (id, e) => {
-        const { name, value } = e.target;
-        setAllData(prev => ({ ...prev, education: { ...prev.education, graduations: prev.education.graduations.map(grad => grad.id === id ? { ...grad, [name]: value } : grad) } }));
-    };
-    const handleAddGrad = () => {
-        const newGrad = { id: Date.now(), degree: '', status: 'Select', dept: '', percentage: '', startYear: '', endYear: '', college: '', city: '', state: '', country: '' };
-        setAllData(prev => ({ ...prev, education: { ...prev.education, graduations: [...prev.education.graduations, newGrad] } }));
-    };
-    const handleRemoveGrad = (id) => {
-        setAllData(prev => ({ ...prev, education: { ...prev.education, graduations: prev.education.graduations.filter(grad => grad.id !== id) } }));
+    const handleSkillsAdd = (skill) => {
+        setAllData(prev => ({
+            ...prev,
+            skills: [...prev.skills, skill]
+        }));
     };
 
-    // --- Experience Handlers ---
-    const handleExpUpdateEntry = (id, e) => {
-        const { name, value } = e.target;
-        setAllData(prev => ({ ...prev, experience: { ...prev.experience, entries: prev.experience.entries.map(entry => entry.id === id ? { ...entry, [name]: value } : entry) } }));
+    const handleSkillsUpdate = (index, skill) => {
+        setAllData(prev => ({
+            ...prev,
+            skills: prev.skills.map((s, i) => i === index ? skill : s)
+        }));
     };
-    const handleAddExpEntry = () => setAllData(prev => ({ ...prev, experience: { ...prev.experience, entries: [...prev.experience.entries, { id: Date.now(), title: '', company: '', startDate: '', endDate: '', industry: 'Select', jobType: 'Select', location: '', responsibilities: '' }] } }));
-    const handleRemoveExpEntry = (id) => setAllData(prev => ({ ...prev, experience: { ...prev.experience, entries: prev.experience.entries.filter(entry => entry.id !== id) } }));
 
-    // --- List Handlers ---
-    const handleArrayAdd = (key, item) => setAllData(prev => ({ ...prev, [key]: [...prev[key], item] }));
-    const handleArrayUpdate = (key, index, item) => { const newList = [...allData[key]]; newList[index] = item; setAllData(prev => ({ ...prev, [key]: newList })); };
-    const handleArrayDelete = (key, index) => { const newList = [...allData[key]]; newList.splice(index, 1); setAllData(prev => ({ ...prev, [key]: newList })); };
+    const handleSkillsDelete = (index) => {
+        setAllData(prev => ({
+            ...prev,
+            skills: prev.skills.filter((_, i) => i !== index)
+        }));
+    };
 
-    // --- Reset Handler (Resets only CURRENT section) ---
+    const handleLanguagesAdd = (lang) => {
+        setAllData(prev => ({
+            ...prev,
+            languages: [...prev.languages, lang]
+        }));
+    };
+
+    const handleLanguagesUpdate = (index, lang) => {
+        setAllData(prev => ({
+            ...prev,
+            languages: prev.languages.map((l, i) => i === index ? lang : l)
+        }));
+    };
+
+    const handleLanguagesDelete = (index) => {
+        setAllData(prev => ({
+            ...prev,
+            languages: prev.languages.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleCertsAdd = (cert) => {
+        setAllData(prev => ({
+            ...prev,
+            certs: [...prev.certs, { ...cert, id: `temp-${Date.now()}` }]
+        }));
+    };
+
+    const handleCertsUpdate = (index, cert) => {
+        setAllData(prev => ({
+            ...prev,
+            certs: prev.certs.map((c, i) => i === index ? { ...c, ...cert } : c)
+        }));
+    };
+
+    const handleCertsDelete = (index) => {
+        setAllData(prev => ({
+            ...prev,
+            certs: prev.certs.filter((_, i) => i !== index)
+        }));
+    };
+
+    const handleProfileChange = (e) => {
+        const { name, value } = e.target;
+        setAllData(prev => ({
+            ...prev,
+            profile: { ...prev.profile, [name]: value }
+        }));
+    };
+
+    const handleCurrentDetailsChange = (e) => {
+        const { name, value } = e.target;
+        setAllData(prev => ({
+            ...prev,
+            currentDetails: { ...prev.currentDetails, [name]: value }
+        }));
+    };
+
+    const handleContactChange = (e) => {
+        const { name, value } = e.target;
+        setAllData(prev => ({
+            ...prev,
+            contact: { ...prev.contact, [name]: value }
+        }));
+    };
+
+    const handleResumeChange = (e) => {
+        const { name, value } = e.target;
+        setAllData(prev => ({
+            ...prev,
+            resume: { ...prev.resume, [name]: value }
+        }));
+    };
+
+    const handlePreferencesChange = (e) => {
+        const { name, value } = e.target;
+        setAllData(prev => ({
+            ...prev,
+            preferences: { ...prev.preferences, [name]: value }
+        }));
+    };
+
     const handleReset = (section) => {
-        const defaults = {
-            profile: { fullName: '', gender: 'Select', dob: '', maritalStatus: 'Select', nationality: '' },
-            currentDetails: { jobTitle: '', company: '', experience: '', noticePeriod: 'Select', currentLocation: '', prefLocation: '' },
-            contact: { mobile: '', altMobile: '', email: '', altEmail: '', address: '', street: '', city: '', state: '', pincode: '', country: '' },
-            resume: { portfolio: '' },
-            education: { highestQual: 'Select', sslc: { institution: '', percentage: '', location: '', year: '' }, hsc: { stream: 'Select', institution: '', location: '', year: '', percentage: '' }, graduations: [{ id: Date.now(), degree: '', status: 'Select', dept: '', percentage: '', startYear: '', endYear: '', college: '', city: '', state: '', country: '' }] },
-            skills: [],
-            experience: { status: 'Fresher', hasExperience: 'No', entries: [{ id: Date.now(), title: '', company: '', startDate: '', endDate: '', industry: 'Select', jobType: 'Select', location: '', responsibilities: '' }] },
-            preferences: { currentCTC: '', expectedCTC: '', jobType: 'Select', role: '', ready: '', relocate: '' },
-            languages: [],
-            certs: [],
-
-
-        };
-
-        if (['skills', 'languages', 'certs'].includes(section)) {
-            setAllData(prev => ({ ...prev, [section]: [] }));
-            return;
+        if (section === 'profile') {
+            setAllData(prev => ({
+                ...prev,
+                profile: {
+                    fullName: '',
+                    gender: 'Select',
+                    dob: '',
+                    maritalStatus: 'Select',
+                    nationality: ''
+                }
+            }));
+        } else if (section === 'currentDetails') {
+            setAllData(prev => ({
+                ...prev,
+                currentDetails: {
+                    jobTitle: '',
+                    company: '',
+                    experience: '',
+                    noticePeriod: 'Select',
+                    currentLocation: '',
+                    prefLocation: ''
+                }
+            }));
+        } else if (section === 'contact') {
+            setAllData(prev => ({
+                ...prev,
+                contact: {
+                    mobile: '',
+                    altMobile: '',
+                    email: '',
+                    altEmail: '',
+                    address: '',
+                    street: '',
+                    city: '',
+                    state: '',
+                    pincode: '',
+                    country: ''
+                }
+            }));
+        } else if (section === 'resume') {
+            setAllData(prev => ({
+                ...prev,
+                resume: { portfolio_link: '' }
+            }));
+            setResumeFile(null);
+        } else if (section === 'education') {
+            setAllData(prev => ({
+                ...prev,
+                education: {
+                    highestQual: 'Select',
+                    sslc: { institution: '', percentage: '', location: '', year: '' },
+                    hsc: { stream: 'Select', institution: '', location: '', year: '', percentage: '' },
+                    graduations: []
+                }
+            }));
+        } else if (section === 'experience') {
+            setAllData(prev => ({
+                ...prev,
+                experience: {
+                    status: 'Fresher',
+                    hasExperience: 'No',
+                    entries: []
+                }
+            }));
+        } else if (section === 'skills') {
+            setAllData(prev => ({ ...prev, skills: [] }));
+        } else if (section === 'languages') {
+            setAllData(prev => ({ ...prev, languages: [] }));
+        } else if (section === 'certs') {
+            setAllData(prev => ({ ...prev, certs: [] }));
+        } else if (section === 'preferences') {
+            setAllData(prev => ({
+                ...prev,
+                preferences: {
+                    currentCTC: '',
+                    expectedCTC: '',
+                    jobType: 'Select',
+                    role: '',
+                    ready: '',
+                    relocate: ''
+                }
+            }));
         }
-
-
-        setAllData(prev => ({ ...prev, [section]: defaults[section] }));
-
-
     };
 
-    const handleDropdownClick = (title) => setOpenDropdown(openDropdown === title ? null : title);
-    const handleItemClick = (title, parent = null) => { setActiveItem(title); if (parent) setOpenDropdown(parent); };
+    const handleSubmitFinal = async () => {
+        setSaving(true);
+        try {
+            // Create FormData for file uploads
+            const formData = new FormData();
 
-    const menuItems = [
-        { title: 'Basic Details', subItems: ['Profile', 'Current Details', 'Contact Details'] },
-        { title: 'Resume' },
-        { title: 'Education Details' },
-        { title: 'Work Experience' },
-        { title: 'Skills & Certifications', subItems: ['Key Skills', 'Languages Known', 'Certifications'] },
-        { title: 'Preferences / Career Details' },
-    ];
+            // Profile data
+            formData.append('full_name', allData.profile.fullName);
+            formData.append('gender', allData.profile.gender);
+            formData.append('dob', allData.profile.dob);
+            formData.append('marital_status', allData.profile.maritalStatus);
+            formData.append('nationality', allData.profile.nationality);
 
-    const renderContent = () => {
+            // Current Details
+            formData.append('current_job_title', allData.currentDetails.jobTitle);
+            formData.append('current_company', allData.currentDetails.company);
+            formData.append('total_experience_years', allData.currentDetails.experience);
+            formData.append('notice_period', allData.currentDetails.noticePeriod);
+            formData.append('current_location', allData.currentDetails.currentLocation);
+            formData.append('preferred_locations', allData.currentDetails.prefLocation);
+
+            // Contact Details
+            formData.append('phone', allData.contact.mobile);
+            formData.append('alternate_phone', allData.contact.altMobile);
+            formData.append('email', allData.contact.email);
+            formData.append('alternate_email', allData.contact.altEmail);
+            formData.append('full_address', allData.contact.address);
+            formData.append('street', allData.contact.street);
+            formData.append('city', allData.contact.city);
+            formData.append('state', allData.contact.state);
+            formData.append('pincode', allData.contact.pincode);
+            formData.append('country', allData.contact.country);
+
+            // Resume
+            formData.append('portfolio_link', allData.resume.portfolio_link);
+            if (resumeFile) {
+                formData.append('resume', resumeFile);
+            }
+
+            // Profile Photo
+            if (profilePhoto) {
+                formData.append('profile_photo', profilePhoto);
+            }
+
+            // Education (convert to JSON string)
+            const educationData = {
+                highest_qualification: allData.education.highestQual,
+                sslc: allData.education.sslc,
+                hsc: allData.education.hsc,
+                graduations: allData.education.graduations
+            };
+            formData.append('education', JSON.stringify(educationData));
+
+            // Experience
+            formData.append('experience_status', allData.experience.status);
+            formData.append('has_experience', allData.experience.hasExperience);
+            formData.append('experiences', JSON.stringify(allData.experience.entries));
+
+            // Skills, Languages, Certifications
+            formData.append('skills', JSON.stringify(allData.skills));
+            formData.append('languages', JSON.stringify(allData.languages));
+            
+            // Certifications (handle files)
+            const certsData = allData.certs.map(cert => ({
+                id: cert.id,
+                name: cert.name,
+                url: cert.url
+            }));
+            formData.append('certifications', JSON.stringify(certsData));
+
+            // Upload certification files
+            allData.certs.forEach((cert, index) => {
+                if (cert.file) {
+                    formData.append(`certificate_${index}`, cert.file);
+                }
+            });
+
+            // Preferences
+            formData.append('current_ctc', allData.preferences.currentCTC);
+            formData.append('expected_ctc', allData.preferences.expectedCTC);
+            formData.append('preferred_job_type', allData.preferences.jobType);
+            formData.append('preferred_role_industry', allData.preferences.role);
+            formData.append('ready_to_start_immediately', allData.preferences.ready === 'Yes');
+            formData.append('willing_to_relocate', allData.preferences.relocate === 'Yes');
+
+            // Send to API
+            await api.put('profile/jobseeker/update/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            alert('Profile updated successfully!');
+            
+            // Move to next step or show success
+            const currentIndex = steps.indexOf(activeItem);
+            if (currentIndex < steps.length - 1) {
+                setActiveItem(steps[currentIndex + 1]);
+            }
+            
+        } catch (error) {
+            console.error('Error saving profile:', error);
+            alert('Failed to save profile. Please try again.');
+        } finally {
+            setSaving(false);
+        }
+    };
+
+    const handleNext = () => {
+        const currentIndex = steps.indexOf(activeItem);
+        if (currentIndex < steps.length - 1) {
+            setActiveItem(steps[currentIndex + 1]);
+        }
+    };
+
+    // Render the appropriate section based on activeItem
+    const renderSection = () => {
         switch (activeItem) {
-            case 'Profile': return (<Profile data={allData.profile} onChange={(e) => handleUpdate('profile', e)} onReset={() => handleReset('profile')} onNext={handleNextStep} setProfilePhoto={setProfilePhoto} />);
-            case 'Current Details': return <CurrentDetails data={allData.currentDetails} onChange={(e) => handleUpdate('currentDetails', e)} onReset={() => handleReset('currentDetails')} onNext={handleNextStep} />;
-            case 'Contact Details': return <ContactDetails data={allData.contact} onChange={(e) => handleUpdate('contact', e)} onReset={() => handleReset('contact')} onNext={handleNextStep} />;
-            case 'Resume': return (<ResumeSection data={allData.resume} onChange={(e) => handleUpdate('resume', e)} onReset={() => handleReset('resume')} onNext={handleNextStep} setResumeFile={setResumeFile} resumeFile={resumeFile} />);
-            case 'Education Details': return <EducationDetails data={allData.education} onUpdateSSLC={handleUpdateSSLC} onUpdateHSC={handleUpdateHSC} onUpdateGrad={handleUpdateGrad} onAddGrad={handleAddGrad} onRemoveGrad={handleRemoveGrad} onReset={() => handleReset('education')} onNext={handleNextStep} />;
-            case 'Work Experience': return <WorkExperience data={allData.experience} onChange={(e) => handleUpdate('experience', e)} onUpdateEntry={handleExpUpdateEntry} onAddEntry={handleAddExpEntry} onRemoveEntry={handleRemoveExpEntry} onReset={() => handleReset('experience')} onNext={handleNextStep} />;
-            case 'Key Skills': return <KeySkills skills={allData.skills} onAdd={(item) => handleArrayAdd('skills', item)} onUpdate={(idx, item) => handleArrayUpdate('skills', idx, item)} onDelete={(idx) => handleArrayDelete('skills', idx)} onReset={() => handleReset('skills')} onNext={handleNextStep} />;
-            case 'Languages Known': return <LanguagesKnown languages={allData.languages} onAdd={(item) => handleArrayAdd('languages', item)} onUpdate={(idx, item) => handleArrayUpdate('languages', idx, item)} onDelete={(idx) => handleArrayDelete('languages', idx)} onReset={() => handleReset('languages')} onNext={handleNextStep} />;
-            case 'Certifications': return <Certifications certs={allData.certs} onAdd={(item) => handleArrayAdd('certs', item)} onUpdate={(idx, item) => handleArrayUpdate('certs', idx, item)} onDelete={(idx) => handleArrayDelete('certs', idx)} onReset={() => handleReset('certs')} onNext={handleNextStep} />;
-
-            // Final Step -> Submit
+            case 'Profile':
+                return (
+                    <Profile
+                        data={allData.profile}
+                        onChange={handleProfileChange}
+                        onReset={() => handleReset('profile')}
+                        onNext={handleNext}
+                        setProfilePhoto={setProfilePhoto}
+                    />
+                );
+            case 'Current Details':
+                return (
+                    <CurrentDetails
+                        data={allData.currentDetails}
+                        onChange={handleCurrentDetailsChange}
+                        onReset={() => handleReset('currentDetails')}
+                        onNext={handleNext}
+                    />
+                );
+            case 'Contact Details':
+                return (
+                    <ContactDetails
+                        data={allData.contact}
+                        onChange={handleContactChange}
+                        onReset={() => handleReset('contact')}
+                        onNext={handleNext}
+                    />
+                );
+            case 'Resume':
+                return (
+                    <ResumeSection
+                        data={allData.resume}
+                        onChange={handleResumeChange}
+                        onReset={() => handleReset('resume')}
+                        onNext={handleNext}
+                        setResumeFile={setResumeFile}
+                        resumeFile={resumeFile}
+                    />
+                );
+            case 'Education Details':
+                return (
+                    <EducationDetails
+                        data={allData.education}
+                        onHighestQualChange={handleHighestQualChange}
+                        onUpdateSSLC={handleUpdateSSLC}
+                        onUpdateHSC={handleUpdateHSC}
+                        onUpdateGrad={handleUpdateGrad}
+                        onAddGrad={handleAddGrad}
+                        onRemoveGrad={handleRemoveGrad}
+                        onReset={() => handleReset('education')}
+                        onNext={handleNext}
+                    />
+                );
+            case 'Work Experience':
+                return (
+                    <WorkExperience
+                        data={allData.experience}
+                        onChange={handleExpChange}
+                        onUpdateEntry={handleExpUpdateEntry}
+                        onAddEntry={handleExpAddEntry}
+                        onRemoveEntry={handleExpRemoveEntry}
+                        onReset={() => handleReset('experience')}
+                        onNext={handleNext}
+                    />
+                );
+            case 'Key Skills':
+                return (
+                    <KeySkills
+                        skills={allData.skills}
+                        onAdd={handleSkillsAdd}
+                        onUpdate={handleSkillsUpdate}
+                        onDelete={handleSkillsDelete}
+                        onReset={() => handleReset('skills')}
+                        onNext={handleNext}
+                    />
+                );
+            case 'Languages Known':
+                return (
+                    <LanguagesKnown
+                        languages={allData.languages}
+                        onAdd={handleLanguagesAdd}
+                        onUpdate={handleLanguagesUpdate}
+                        onDelete={handleLanguagesDelete}
+                        onReset={() => handleReset('languages')}
+                        onNext={handleNext}
+                    />
+                );
+            case 'Certifications':
+                return (
+                    <Certifications
+                        certs={allData.certs}
+                        onAdd={handleCertsAdd}
+                        onUpdate={handleCertsUpdate}
+                        onDelete={handleCertsDelete}
+                        onReset={() => handleReset('certs')}
+                        onNext={handleNext}
+                    />
+                );
             case 'Preferences / Career Details':
                 return (
                     <Preferences
                         data={allData.preferences}
-                        onChange={(e) => handleUpdate('preferences', e)}
+                        onChange={handlePreferencesChange}
                         onReset={() => handleReset('preferences')}
-                        onSubmitFinal={handleFinalSubmit}
+                        onSubmitFinal={handleSubmitFinal}
                         saving={saving}
                     />
                 );
-            default: return <Profile data={allData.profile} onChange={(e) => handleUpdate('profile', e)} onReset={() => handleReset('profile')} onNext={handleNextStep} />;
+            default:
+                return null;
         }
     };
 
     return (
-        <div>
-            <JHeader />
-            <main>
-                <div className='profile-main-desc'>
-                    <h1>My Profile</h1>
-                    <p>Build and update your profile with personal, education, and career details to connect with the right opportunities.</p>
+        <div className="my-profile-container">
+            <Header />
+            <div className="profile-content">
+                <div className="sidebar">
+                    <div className="sidebar-section">
+                        <h3 className="sidebar-heading">Basic Details</h3>
+                        <ul className="sidebar-menu">
+                            <li 
+                                className={activeItem === 'Profile' ? 'active' : ''}
+                                onClick={() => setActiveItem('Profile')}
+                            >
+                                Profile
+                            </li>
+                            <li 
+                                className={activeItem === 'Current Details' ? 'active' : ''}
+                                onClick={() => setActiveItem('Current Details')}
+                            >
+                                Current Details
+                            </li>
+                            <li 
+                                className={activeItem === 'Contact Details' ? 'active' : ''}
+                                onClick={() => setActiveItem('Contact Details')}
+                            >
+                                Contact Details
+                            </li>
+                            <li 
+                                className={activeItem === 'Resume' ? 'active' : ''}
+                                onClick={() => setActiveItem('Resume')}
+                            >
+                                Resume
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className="sidebar-section">
+                        <h3 className="sidebar-heading">Education & Skills</h3>
+                        <ul className="sidebar-menu">
+                            <li 
+                                className={activeItem === 'Education Details' ? 'active' : ''}
+                                onClick={() => setActiveItem('Education Details')}
+                            >
+                                Education Details
+                            </li>
+                            <li 
+                                className={activeItem === 'Work Experience' ? 'active' : ''}
+                                onClick={() => setActiveItem('Work Experience')}
+                            >
+                                Work Experience
+                            </li>
+                            <li 
+                                className={activeItem === 'Key Skills' ? 'active' : ''}
+                                onClick={() => setActiveItem('Key Skills')}
+                            >
+                                Key Skills
+                            </li>
+                            <li 
+                                className={activeItem === 'Languages Known' ? 'active' : ''}
+                                onClick={() => setActiveItem('Languages Known')}
+                            >
+                                Languages Known
+                            </li>
+                            <li 
+                                className={activeItem === 'Certifications' ? 'active' : ''}
+                                onClick={() => setActiveItem('Certifications')}
+                            >
+                                Certifications
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div className="sidebar-section">
+                        <h3 className="sidebar-heading">Preferences</h3>
+                        <ul className="sidebar-menu">
+                            <li 
+                                className={activeItem === 'Preferences / Career Details' ? 'active' : ''}
+                                onClick={() => setActiveItem('Preferences / Career Details')}
+                            >
+                                Preferences / Career Details
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div className="profile-main-content">
-                    <aside className="sidebar">
-                        {menuItems.map(item => {
-                            const isParentActive = item.subItems ? item.subItems.includes(activeItem) : activeItem === item.title;
-                            return (
-                                <div key={item.title}>
-                                    <div className={`sidebar-item ${item.subItems ? 'has-submenu' : ''} ${item.subItems && openDropdown === item.title ? 'open' : ''} ${isParentActive ? 'active-main' : ''}`} onClick={() => item.subItems ? handleDropdownClick(item.title) : handleItemClick(item.title)}>
-                                        {item.title}
-                                        {item.subItems && <span className="arrow"></span>}
-                                    </div>
-                                    {item.subItems && openDropdown === item.title && (
-                                        <div className="submenu">
-                                            {item.subItems.map(subItem => (
-                                                <div key={subItem} className={`submenu-item ${activeItem === subItem ? 'active' : ''}`} onClick={(e) => { e.stopPropagation(); handleItemClick(subItem, item.title); }}>
-                                                    <span className="dot">•</span> {subItem}
-                                                </div>
-                                            ))}
-                                        </div>
-                                    )}
-                                </div>
-                            );
-                        })}
-                    </aside>
-                    <section className="content-area">{renderContent()}</section>
+
+                <div className="main-content">
+                    {renderSection()}
                 </div>
-            </main>
-            <footer className='myprofile-footer'>© 2025 JobPortal. All rights reserved.</footer>
+            </div>
         </div>
-    )
-}
+    );
+};

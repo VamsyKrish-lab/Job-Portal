@@ -35,6 +35,10 @@ from .views import (
     DeleteJobView,
     JobListView,
     NewsletterSubscribeAPIView,
+    SubmitComplaintView,
+    AdminComplaintListView,
+    AdminUpdateComplaintView,
+    VerifyEmailOTPView
 )
 from . import views 
  
@@ -126,6 +130,15 @@ urlpatterns = [
     path("subscribe/", NewsletterSubscribeAPIView.as_view(), name="subscribe-newsletter"),
 
     path('jobseekers/', views.JobSeekerListView.as_view(), name='jobseeker-list'),
+
+    # Report A Job
+
+    path('complaints/submit/', SubmitComplaintView.as_view()),
+    path('admin/complaints/', AdminComplaintListView.as_view()),
+    path('admin/complaints/<int:pk>/', AdminUpdateComplaintView.as_view()),
+
+    # OTP Verify
+    path('verify-email-otp/', VerifyEmailOTPView.as_view(), name='verify-email-otp'),
 
 ]    
 
