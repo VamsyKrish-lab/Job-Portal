@@ -18,3 +18,18 @@ class IsJobSeeker(BasePermission):
 class IsAdminUserType(BasePermission):
     def has_permission(self, request, view):
         return request.user.is_authenticated and request.user.user_type == "admin"    
+    
+# About Company
+
+from rest_framework.permissions import BasePermission
+
+
+class IsEmployerOrAdmin(BasePermission):
+    def has_permission(self, request, view):
+        return (
+            request.user.is_authenticated and
+            (
+                request.user.user_type == "employer" or
+                request.user.is_staff  # admin
+            )
+        )    

@@ -38,7 +38,10 @@ from .views import (
     SubmitComplaintView,
     AdminComplaintListView,
     AdminUpdateComplaintView,
-    VerifyEmailOTPView
+    VerifyEmailOTPView,
+    CompanyProfileCreateView,
+    CompanyProfileDetailView,
+    CompanyProfileUpdateView
 )
 from . import views 
  
@@ -139,6 +142,11 @@ urlpatterns = [
 
     # OTP Verify
     path('verify-email-otp/', VerifyEmailOTPView.as_view(), name='verify-email-otp'),
+
+    # About Company
+    path('company/profile/create/', CompanyProfileCreateView.as_view()),
+    path('company/profile/', CompanyProfileDetailView.as_view()),
+    path('company/profile/update/', CompanyProfileUpdateView.as_view()),
 
 ]    
 

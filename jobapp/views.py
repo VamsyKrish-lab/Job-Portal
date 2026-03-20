@@ -1384,3 +1384,69 @@ class AdminUpdateComplaintView(APIView):
         complaint.save()
 
         return Response({"message": "Status updated"})
+    
+# About Company
+
+from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework import status
+from .models import CompanyProfile
+from .serializers import CompanyProfileSerializer
+from .permissions import IsEmployerOrAdmin
+
+# ✅ CREATE
+class CompanyProfileCreateView(APIView):
+    permission_classes = [IsEmployerOrAdmin]
+
+    def post(self, request):
+
+        if CompanyProfile.objects.filter(user=request.user).exists():
+            return Response({"error": "Profile already exists"}, status=400)
+
+        serializer = CompanyProfileSerializer(
+            data=request.data,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Created successfully"})
+
+        return Response(serializer.errors, status=400)
+
+
+# ✅ GET
+class CompanyProfileDetailView(APIView):
+    permission_classes = [IsEmployerOrAdmin]
+
+    def get(self, request):
+        try:
+            profile = CompanyProfile.objects.get(user=request.user)
+            return Response(CompanyProfileSerializer(profile).data)
+        except CompanyProfile.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+
+# ✅ UPDATE
+class CompanyProfileUpdateView(APIView):
+    permission_classes = [IsEmployerOrAdmin]
+
+    def patch(self, request):
+        try:
+            profile = CompanyProfile.objects.get(user=request.user)
+        except CompanyProfile.DoesNotExist:
+            return Response({"error": "Not found"}, status=404)
+
+        serializer = CompanyProfileSerializer(
+            profile,
+            data=request.data,
+            partial=True,
+            context={'request': request}
+        )
+
+        if serializer.is_valid():
+            serializer.save()
+            return Response({"message": "Updated successfully"})
+
+        return Response(serializer.errors, status=400)

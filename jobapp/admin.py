@@ -324,3 +324,31 @@ class ComplaintAdmin(admin.ModelAdmin):
 
    
     full_name.admin_order_field = 'first_name'
+
+# About Company
+
+from django.contrib import admin
+from .models import CompanyProfile
+
+
+@admin.register(CompanyProfile)
+class CompanyProfileAdmin(admin.ModelAdmin):
+
+    list_display = (
+        'company_name',
+        'user',
+        'contact_person',
+        'company_email',
+        'company_size',
+        'created_at'
+    )
+
+    search_fields = (
+        'company_name',
+        'contact_person',
+        'company_email'
+    )
+
+    list_filter = ('company_size', 'created_at')
+
+    readonly_fields = ('created_at',)    
